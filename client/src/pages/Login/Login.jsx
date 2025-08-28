@@ -1,7 +1,44 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { FcGoogle } from 'react-icons/fc'
+import useAuth from '../../hooks/useAuth'
+import toast from 'react-hot-toast'
+import { TbFidgetSpinner } from 'react-icons/tb'
 
 const Login = () => {
+  const { signIn, loading, signInWithGoogle } = useAuth()
+  const navigate = useNavigate();
+
+
+  const handleLogin = async e => {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget)
+    const email = form.get('email');
+    const password = form.get('password');
+
+    try {
+      const result = await signIn(email, password);
+      console.log(result);
+      toast.success('SignIn successful');
+      navigate('/')
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+
+  // google login
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithGoogle()
+      console.log(result);
+      toast.success('Sign In Complete')
+      navigate('/')
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <div className='flex justify-center items-center min-h-screen'>
       <div className='flex flex-col max-w-md p-6 rounded-md sm:p-10 bg-gray-100 text-gray-900'>
@@ -12,8 +49,7 @@ const Login = () => {
           </p>
         </div>
         <form
-          noValidate=''
-          action=''
+          onClick={handleLogin}
           className='space-y-6 ng-untouched ng-pristine ng-valid'
         >
           <div className='space-y-4'>
@@ -54,7 +90,7 @@ const Login = () => {
               type='submit'
               className='bg-rose-500 w-full rounded-md py-3 text-white'
             >
-              Continue
+              {loading ? <TbFidgetSpinner className='animate-spin m-auto'></TbFidgetSpinner> : 'Continue'}
             </button>
           </div>
         </form>
@@ -70,11 +106,11 @@ const Login = () => {
           </p>
           <div className='flex-1 h-px sm:w-16 dark:bg-gray-700'></div>
         </div>
-        <div className='flex justify-center items-center space-x-2 border m-3 p-2 border-gray-300 border-rounded cursor-pointer'>
+        <button disabled={loading} onClick={handleGoogleLogin} className='flex justify-center items-center space-x-2 border m-3 p-2 border-gray-300 border-rounded cursor-pointer'>
           <FcGoogle size={32} />
 
           <p>Continue with Google</p>
-        </div>
+        </button>
         <p className='px-6 text-sm text-center text-gray-400'>
           Don&apos;t have an account yet?{' '}
           <Link
