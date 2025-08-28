@@ -47,6 +47,11 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+
+    // Collections
+    const roomsCollection = client.db('BaytSlashDb').collection('rooms')
+
+
     // auth related api
     app.post('/jwt', async (req, res) => {
       const user = req.body
@@ -75,6 +80,23 @@ async function run() {
       } catch (err) {
         res.status(500).send(err)
       }
+    })
+
+
+
+    // rooms related Api
+    app.get('/rooms', async (req, res) => {
+      const cursor = roomsCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+
+    // getting single room
+    app.get('/room/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id : new ObjectId(id) };
+      const result = await roomsCollection.findOne(query)
+      res.send(result);
     })
 
     // Send a ping to confirm a successful connection
