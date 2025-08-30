@@ -4,9 +4,13 @@ import { DateRange } from 'react-date-range';
 import { imageUpload } from '../../../api/utils/image_upload';
 import useAuth from '../../../hooks/useAuth';
 import { Helmet } from 'react-helmet-async';
+import { useMutation } from '@tanstack/react-query';
+import useAxiosSecure from '../../../hooks/useAxiosSecure';
+import toast from 'react-hot-toast';
 const AddRoom = () => {
 
     const { user } = useAuth();
+    const axiosSecure = useAxiosSecure();
     const [state, setState] = useState([
         {
             startDate: new Date(),
@@ -15,6 +19,17 @@ const AddRoom = () => {
         }
     ]);
     console.log(state);
+
+
+    const {mutateAsync} = useMutation({
+        mutationFn : async (roomData) => {
+            const {data} = await axiosSecure.post('/rooms', roomData);
+            return data;
+        },
+        onSuccess: () => {
+            toast.success('Room Info saved to Database')
+        }
+    })
 
     const handleSubmit = async e => {
         e.preventDefault();
@@ -39,7 +54,7 @@ const AddRoom = () => {
 
         try {
             const image_url = await imageUpload(image)
-            const formData = {
+            const roomData = {
                 location,
                 category,
                 title,
@@ -55,11 +70,13 @@ const AddRoom = () => {
             }
 
 
-            console.table(formData);
+            console.table(roomData);
 
 
             // Post req to server
+            await mutateAsync(roomData)
             
+
         } catch (error) {
             console.log(error);
         }

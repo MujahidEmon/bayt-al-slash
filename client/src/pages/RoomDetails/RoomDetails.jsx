@@ -21,6 +21,7 @@ const RoomDetails = () => {
       return res.data
     }
   })
+  console.log(room);
   return (
     <Container>
       <Helmet>
@@ -62,7 +63,7 @@ const RoomDetails = () => {
                     height='30'
                     width='30'
                     alt='Avatar'
-                    src={room?.host?.image}
+                    src={room?.host?.photo}
                   />
                 </div>
                 <div
