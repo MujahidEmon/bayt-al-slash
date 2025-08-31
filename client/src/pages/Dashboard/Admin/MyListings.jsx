@@ -18,6 +18,11 @@ const MyListings = () => {
     })
     console.log(rooms);
 
+
+    const handleDelete = (id) => {
+        console.log(id);
+    }
+
     if (isLoading) return <LoadingSpinner></LoadingSpinner>
     return (
         <>
@@ -78,7 +83,7 @@ const MyListings = () => {
                                 </thead>
                                 <tbody>
                                     {
-                                        rooms.map(room => <RoomDataRow key={room._id} room={room} refetch={refetch}></RoomDataRow>)
+                                        rooms.map(room => <RoomDataRow key={room._id} room={room} refetch={refetch} handleDelete={handleDelete}></RoomDataRow>)
                                     }
                                 </tbody>
                             </table>
