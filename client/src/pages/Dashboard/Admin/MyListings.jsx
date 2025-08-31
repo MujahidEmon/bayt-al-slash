@@ -3,12 +3,13 @@ import { Helmet } from 'react-helmet-async'
 import useAxiosSecure from '../../../hooks/useAxiosSecure'
 import useAuth from '../../../hooks/useAuth';
 import LoadingSpinner from '../../../components/Shared/LoadingSpinner';
+import RoomDataRow from '../../../components/Dashboard/RoomDataRow';
 
 const MyListings = () => {
     const axiosSecure = useAxiosSecure();
     const {user} = useAuth();
 
-    const {data: rooms = [], isLoading} = useQuery({
+    const {data: rooms = [], isLoading, refetch} = useQuery({
         queryKey: ['rooms'],
         queryFn: async () => {
             const res = await axiosSecure.get(`/rooms/${user.email}`)
@@ -75,7 +76,11 @@ const MyListings = () => {
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody>{/* Room row data */}</tbody>
+                                <tbody>
+                                    {
+                                        rooms.map(room => <RoomDataRow key={room._id} room={room} refetch={refetch}></RoomDataRow>)
+                                    }
+                                </tbody>
                             </table>
                         </div>
                     </div>
