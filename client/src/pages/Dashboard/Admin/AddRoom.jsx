@@ -24,7 +24,6 @@ const AddRoom = () => {
             key: 'selection'
         }
     ]);
-    console.log(state);
 
 
     const { mutateAsync } = useMutation({
@@ -35,12 +34,11 @@ const AddRoom = () => {
         onSuccess: () => {
             toast.success('Room Info saved to Database');
             setLoading(false)
-            navigate('my-listings');
+            navigate('/dashboard/my-listings');
         }
     })
 
     const handleImage = image => {
-        console.log(image);
         const imgUrl = URL.createObjectURL(image);
         setImageText(image?.name);
         setUploadImgUrl(imgUrl);
@@ -61,7 +59,7 @@ const AddRoom = () => {
         const image = form.get('image')
         const from = state[0].startDate;
         const to = state[0].endDate;
-        console.log(from, to);
+        // console.log(from, to);
         const host = {
             name: user.displayName,
             email: user.email,
@@ -108,7 +106,8 @@ const AddRoom = () => {
             <Helmet>
                 <title>Add Room | Dashboard</title>
             </Helmet>
-            <div className='w-full min-h-[calc(100vh-40px)] flex flex-col justify-center items-center text-gray-800 rounded-xl bg-gray-50'>
+            <div className='w-full py-6 md:py-10 min-h-[calc(100vh-40px)] flex flex-col justify-center items-center text-gray-800 rounded-xl bg-gray-50'>
+                <h1 className='font-bold mb-6 md:mb-10 text-3xl'>Add Your Room</h1>
                 <form onSubmit={handleSubmit}>
                     <div className='grid grid-cols-1 lg:grid-cols-2 gap-10'>
                         <div className='space-y-6'>
@@ -289,10 +288,11 @@ const AddRoom = () => {
 
                     <button
                         type='submit'
+                        disabled={loading}
                         className='w-full p-3 mt-5 text-center font-medium text-white transition duration-200 rounded shadow-md bg-rose-500'
                     >
                         {
-                            loading ? <HashLoader></HashLoader> : 'Save & Continue'
+                            loading ? <HashLoader color='white' size={15}></HashLoader> : 'Save & Continue'
                         }
                     </button>
                 </form>
