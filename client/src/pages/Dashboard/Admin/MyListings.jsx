@@ -1,15 +1,16 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Helmet } from 'react-helmet-async'
 import useAxiosSecure from '../../../hooks/useAxiosSecure'
 import useAuth from '../../../hooks/useAuth';
 import LoadingSpinner from '../../../components/Shared/LoadingSpinner';
 import RoomDataRow from '../../../components/Dashboard/RoomDataRow';
+import toast from 'react-hot-toast';
 
 const MyListings = () => {
     const axiosSecure = useAxiosSecure();
-    const {user} = useAuth();
+    const { user } = useAuth();
 
-    const {data: rooms = [], isLoading, refetch} = useQuery({
+    const { data: rooms = [], isLoading, refetch } = useQuery({
         queryKey: ['rooms'],
         queryFn: async () => {
             const res = await axiosSecure.get(`/rooms/${user.email}`)
@@ -19,8 +20,25 @@ const MyListings = () => {
     console.log(rooms);
 
 
+    const { mutateAsync } = useMutation({
+        mutationFn: async (id) => {
+            const { data } = await axiosSecure.delete(`/room/${id}`)
+            console.log(data);
+            return data;
+        },
+        onSuccess: () => {
+            refetch();
+            toast.success('Deleted Successfully');
+        }
+    })
+
     const handleDelete = (id) => {
         console.log(id);
+        try {
+            mutateAsync(id); 
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     if (isLoading) return <LoadingSpinner></LoadingSpinner>
