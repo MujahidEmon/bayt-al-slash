@@ -7,10 +7,16 @@ import { Helmet } from 'react-helmet-async';
 import { useMutation } from '@tanstack/react-query';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import { HashLoader } from 'react-spinners';
 const AddRoom = () => {
 
     const { user } = useAuth();
     const axiosSecure = useAxiosSecure();
+    const navigate = useNavigate();
+    const [imageText, setImageText] = useState('Upload Image')
+    const [uploadImgUrl, setUploadImgUrl] = useState('')
+    const [loading, setLoading] = useState(false);
     const [state, setState] = useState([
         {
             startDate: new Date(),
@@ -21,18 +27,28 @@ const AddRoom = () => {
     console.log(state);
 
 
-    const {mutateAsync} = useMutation({
-        mutationFn : async (roomData) => {
-            const {data} = await axiosSecure.post('/rooms', roomData);
+    const { mutateAsync } = useMutation({
+        mutationFn: async (roomData) => {
+            const { data } = await axiosSecure.post('/rooms', roomData);
             return data;
         },
         onSuccess: () => {
-            toast.success('Room Info saved to Database')
+            toast.success('Room Info saved to Database');
+            setLoading(false)
+            navigate('my-listings');
         }
     })
 
+    const handleImage = image => {
+        console.log(image);
+        const imgUrl = URL.createObjectURL(image);
+        setImageText(image?.name);
+        setUploadImgUrl(imgUrl);
+    }
+
     const handleSubmit = async e => {
         e.preventDefault();
+        setLoading(true)
         const form = new FormData(e.currentTarget)
         const location = form.get('location')
         const category = form.get('category')
@@ -75,10 +91,11 @@ const AddRoom = () => {
 
             // Post req to server
             await mutateAsync(roomData)
-            
+
 
         } catch (error) {
             console.log(error);
+            setLoading(false)
         }
     }
 
@@ -155,21 +172,45 @@ const AddRoom = () => {
 
                             <div className=' p-4 bg-white w-full  m-auto rounded-lg'>
                                 <div className='file_upload px-5 py-3 relative border-4 border-dotted border-gray-300 rounded-lg'>
-                                    <div className='flex flex-col w-max mx-auto text-center'>
-                                        <label>
-                                            <input
-                                                className='text-sm cursor-pointer w-36 hidden'
-                                                type='file'
-                                                name='image'
-                                                id='image'
-                                                accept='image/*'
-                                                hidden
-                                            />
-                                            <div className='bg-rose-500 text-white border border-gray-300 rounded font-semibold cursor-pointer p-1 px-3 hover:bg-rose-500'>
-                                                Upload Image
+                                    {
+                                        uploadImgUrl ?
+                                            <div className='flex flex-col justify-between items-center gap-4 md:flex-row w-max mx-auto text-center'>
+                                                <label className='w-2/5'>
+                                                    <input
+                                                        className='text-sm cursor-pointer w-36 hidden'
+                                                        type='file'
+                                                        name='image'
+                                                        onChange={(e) => handleImage(e.target.files[0])}
+                                                        id='image'
+                                                        accept='image/*'
+                                                        hidden
+                                                    />
+                                                    <div className='bg-rose-500 text-white border border-gray-300 rounded font-semibold cursor-pointer p-1 px-3 hover:bg-rose-500'>
+                                                        {imageText}
+                                                    </div>
+                                                </label>
+                                                <div className='w-3/5  flex items-center justify-center'>
+                                                    <img className='rounded-lg shadow-lg h-36' src={uploadImgUrl} />
+                                                </div>
                                             </div>
-                                        </label>
-                                    </div>
+                                            : <div className='flex flex-col w-max mx-auto text-center'>
+                                                <label>
+                                                    <input
+                                                        className='text-sm cursor-pointer w-36 hidden'
+                                                        type='file'
+                                                        name='image'
+                                                        onChange={(e) => handleImage(e.target.files[0])}
+                                                        id='image'
+                                                        accept='image/*'
+                                                        hidden
+                                                    />
+                                                    <div className='bg-rose-500 text-white border border-gray-300 rounded font-semibold cursor-pointer p-1 px-3 hover:bg-rose-500'>
+                                                        Upload Image
+                                                    </div>
+                                                </label>
+                                            </div>
+
+                                    }
                                 </div>
                             </div>
                             <div className='flex justify-between gap-2'>
@@ -250,7 +291,9 @@ const AddRoom = () => {
                         type='submit'
                         className='w-full p-3 mt-5 text-center font-medium text-white transition duration-200 rounded shadow-md bg-rose-500'
                     >
-                        Save & Continue
+                        {
+                            loading ? <HashLoader></HashLoader> : 'Save & Continue'
+                        }
                     </button>
                 </form>
             </div>
