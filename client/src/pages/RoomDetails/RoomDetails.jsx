@@ -5,6 +5,7 @@ import Heading from '../../components/Shared/Heading'
 import { useQuery } from '@tanstack/react-query'
 import useAxiosPublic from '../../hooks/useAxiosPublic'
 import { useParams } from 'react-router-dom'
+import LoadingSpinner from '../../components/Shared/LoadingSpinner'
 
 
 // single room
@@ -21,7 +22,9 @@ const RoomDetails = () => {
       return res.data
     }
   })
-  console.log(room);
+
+  if (isLoading) return <LoadingSpinner></LoadingSpinner>
+
   return (
     <Container>
       <Helmet>
