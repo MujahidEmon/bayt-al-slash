@@ -3,7 +3,7 @@ import Button from '../Shared/Button/Button'
 import { useState } from 'react';
 import { DateRange } from 'react-date-range';
 
-const RoomReservation = ({ room }) => {
+const RoomReservation = ({ room, totalPrice }) => {
 
   const [state, setState] = useState([
     {
@@ -44,7 +44,7 @@ const RoomReservation = ({ room }) => {
       <hr />
       <div className='p-4 flex items-center justify-between font-semibold text-lg'>
         <div>Total</div>
-        <div>${room?.price}</div>
+        <div>${totalPrice}</div>
       </div>
     </div>
   )

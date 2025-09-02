@@ -29,7 +29,9 @@ const RoomDetails = () => {
     new Date(room.to),
     new Date(room.from)
   )
-  console.log(parseInt(result));
+
+  const totalPrice = parseInt(result*room.price)
+  console.log(totalPrice);
 
   if (isLoading) return <LoadingSpinner></LoadingSpinner>
 
@@ -105,7 +107,7 @@ const RoomDetails = () => {
 
             <div className='md:col-span-3 order-first md:order-last mb-10'>
               {/* RoomReservation */}
-              <RoomReservation room={room} />
+              <RoomReservation totalPrice={totalPrice} room={room} />
             </div>
           </div>
         </div>
