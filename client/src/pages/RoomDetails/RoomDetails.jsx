@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import useAxiosPublic from '../../hooks/useAxiosPublic'
 import { useParams } from 'react-router-dom'
 import LoadingSpinner from '../../components/Shared/LoadingSpinner'
+import { differenceInDays } from 'date-fns'
 
 
 // single room
@@ -13,8 +14,8 @@ import LoadingSpinner from '../../components/Shared/LoadingSpinner'
 
 const RoomDetails = () => {
   const axiosPublic = useAxiosPublic();
-  const {id} = useParams();
-  const {data: room = {}, isLoading} = useQuery({
+  const { id } = useParams();
+  const { data: room = {}, isLoading } = useQuery({
     queryKey: ['room', id],
     queryFn: async () => {
       const res = await axiosPublic.get(`/room/${id}`)
@@ -22,6 +23,13 @@ const RoomDetails = () => {
       return res.data
     }
   })
+
+
+  const result = differenceInDays(
+    new Date(room.to),
+    new Date(room.from)
+  )
+  console.log(parseInt(result));
 
   if (isLoading) return <LoadingSpinner></LoadingSpinner>
 
