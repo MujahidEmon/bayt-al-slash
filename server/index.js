@@ -86,6 +86,8 @@ async function run() {
       const user = req.body;
       const options = { upsert: true };
       const query = { email: user?.email };
+      const isExist = await usersCollection.findOne(query)
+      if(isExist) return res.send(isExist)
 
       const updateDoc = {
         ...user,
@@ -94,6 +96,12 @@ async function run() {
       const result = await usersCollection.updateOne(query, updateDoc, options);
       res.send(result);
     });
+
+
+    app.get('/users', async (req, res) => {
+      const result = await usersCollection.find().toArray()
+      res.send(result)
+    })
 
     // rooms related Api
     app.get("/rooms", async (req, res) => {
