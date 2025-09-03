@@ -81,19 +81,19 @@ async function run() {
       }
     });
 
-
     // users db
-    app.put('/user', async (req, res) => {
+    app.put("/user", async (req, res) => {
       const user = req.body;
-      const options = {upsert: true}
-      const query = {email: user?.email}
+      const options = { upsert: true };
+      const query = { email: user?.email };
 
       const updateDoc = {
-        ...user
-      }
-      const result = await usersCollection.updateOne(query, updateDoc, options)
-    })
-
+        ...user,
+        timestamp: Date.now(),  
+      };
+      const result = await usersCollection.updateOne(query, updateDoc, options);
+      res.send(result);
+    });
 
     // rooms related Api
     app.get("/rooms", async (req, res) => {
@@ -104,13 +104,12 @@ async function run() {
       res.send(result);
     });
 
-
-    app.post('/rooms', async(req, res) => {
+    app.post("/rooms", async (req, res) => {
       const room = req.body;
       console.log(room);
       const result = await roomsCollection.insertOne(room);
       res.send(result);
-    })
+    });
 
     // getting single room
     app.get("/room/:id", async (req, res) => {
@@ -127,12 +126,10 @@ async function run() {
     });
     app.get("/rooms/:email", async (req, res) => {
       const email = req.params.email;
-      const query = { 'host.email' : email };
+      const query = { "host.email": email };
       const result = await roomsCollection.find(query).toArray();
       res.send(result);
     });
-
-
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
