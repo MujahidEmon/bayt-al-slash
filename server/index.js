@@ -49,6 +49,7 @@ async function run() {
   try {
     // Collections
     const roomsCollection = client.db("BaytSlashDb").collection("rooms");
+    const usersCollection = client.db("BaytSlashDb").collection("users");
 
     // auth related api
     app.post("/jwt", async (req, res) => {
@@ -79,6 +80,20 @@ async function run() {
         res.status(500).send(err);
       }
     });
+
+
+    // users db
+    app.put('/user', async (req, res) => {
+      const user = req.body;
+      const options = {upsert: true}
+      const query = {email: user?.email}
+
+      const updateDoc = {
+        ...user
+      }
+      const result = await usersCollection.updateOne(query, updateDoc, options)
+    })
+
 
     // rooms related Api
     app.get("/rooms", async (req, res) => {
