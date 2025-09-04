@@ -86,22 +86,23 @@ async function run() {
       const user = req.body;
       const options = { upsert: true };
       const query = { email: user?.email };
-      const isExist = await usersCollection.findOne(query)
-      if(isExist) return res.send(isExist)
+      const isExist = await usersCollection.findOne(query);
+      if (isExist) return res.send(isExist);
 
       const updateDoc = {
-        ...user,
-        timestamp: Date.now(),  
+        $set: {
+          ...user,
+          timestamp: Date.now(),
+        },
       };
       const result = await usersCollection.updateOne(query, updateDoc, options);
       res.send(result);
     });
 
-
-    app.get('/users', async (req, res) => {
-      const result = await usersCollection.find().toArray()
-      res.send(result)
-    })
+    app.get("/users", async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
 
     // rooms related Api
     app.get("/rooms", async (req, res) => {
