@@ -84,11 +84,20 @@ async function run() {
     // users db
     app.put("/user", async (req, res) => {
       const user = req.body;
-      const options = { upsert: true };
       const query = { email: user?.email };
       const isExist = await usersCollection.findOne(query);
-      if (isExist) return res.send(isExist);
-
+      if (isExist) {
+        if (user?.status === "Requested") {
+          const result = await usersCollection.updateOne(query, {
+            $set: { status: user?.status },
+          });
+          return res.send(result);
+        } else {
+          return res.send(isExist);
+        }
+      }
+      
+      const options = { upsert: true };
       const updateDoc = {
         $set: {
           ...user,

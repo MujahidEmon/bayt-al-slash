@@ -25,9 +25,9 @@ const Navbar = () => {
       status: 'Requested'
     }
 
-    const {data} = await axiosSecure.put('/user', userInfo)
-    console.log(data);
-    if(data.modifiedCount> 0){
+    const res = await axiosSecure.put('/user', userInfo)
+    console.log(res.data);
+    if(res.data.modifiedCount> 0){
       toast.success('Request Sent Successfully, Please wait for admin approval')
     }
     else{
