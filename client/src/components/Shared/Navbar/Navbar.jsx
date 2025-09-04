@@ -5,13 +5,39 @@ import { Link } from 'react-router-dom'
 import useAuth from '../../../hooks/useAuth'
 import avatarImg from '../../../assets/images/placeholder.jpg'
 import HostModal from '../../Modal/HostModal'
+import useAxiosSecure from '../../../hooks/useAxiosSecure'
+import toast from 'react-hot-toast'
 
 const Navbar = () => {
+  const axiosSecure = useAxiosSecure();
   const { user, logOut } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const closeModal = () => {
     setIsModalOpen(false)
+  }
+
+  const modalHandler = async () => {
+    try {
+      const userInfo = {
+      email: user?.email,
+      role: 'guest',
+      status: 'Requested'
+    }
+
+    const {data} = await axiosSecure.put('/user', userInfo)
+    console.log(data);
+    if(data.modifiedCount> 0){
+      toast.success('Request Sent Successfully, Please wait for admin approval')
+    }
+    else{
+      toast.success('Please wait for admin approval')
+    }
+
+    } catch (error) {
+      console.log(error);
+    }
+    closeModal()
   }
 
   return (
@@ -45,6 +71,7 @@ const Navbar = () => {
                   )}
                   <HostModal isOpen={isModalOpen}
                   closeModal={closeModal}
+                  modalHandler={modalHandler}
                   ></HostModal>
                 </div>
                 {/* Dropdown btn */}
