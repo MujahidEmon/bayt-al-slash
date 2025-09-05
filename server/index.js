@@ -5,6 +5,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const jwt = require("jsonwebtoken");
+const e = require("express");
 
 const port = process.env.PORT || 5000;
 
@@ -112,6 +113,14 @@ async function run() {
       const result = await usersCollection.find().toArray();
       res.send(result);
     });
+
+    // single user
+    app.get('/user/:email' , async (req, res) => {
+      const email = req.params.email;
+      const query = {email: email}
+      const result = await usersCollection.findOne(query)
+      res.send(result);
+    })
 
     // rooms related Api
     app.get("/rooms", async (req, res) => {
