@@ -8,10 +8,14 @@ import { NavLink } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { MdHomeWork } from 'react-icons/md'
 import useAuth from '../../hooks/useAuth'
+import useRole from '../../hooks/useRole'
+import MenuItem from './Sidebar/MenuItem'
 
 const Sidebar = () => {
   const { logOut } = useAuth()
   const [isActive, setActive] = useState(false)
+  const [role] = useRole()
+  console.log(role);
 
   // Sidebar Responsive Handler
   const handleToggle = () => {
@@ -45,9 +49,8 @@ const Sidebar = () => {
 
       {/* Sidebar */}
       <div
-        className={`z-10 md:fixed flex flex-col justify-between overflow-x-hidden bg-gray-100 w-64 space-y-6 px-2 py-4 absolute inset-y-0 left-0 transform ${
-          isActive && '-translate-x-full'
-        }  md:translate-x-0  transition duration-200 ease-in-out`}
+        className={`z-10 md:fixed flex flex-col justify-between overflow-x-hidden bg-gray-100 w-64 space-y-6 px-2 py-4 absolute inset-y-0 left-0 transform ${isActive && '-translate-x-full'
+          }  md:translate-x-0  transition duration-200 ease-in-out`}
       >
         <div>
           <div>
@@ -70,27 +73,16 @@ const Sidebar = () => {
 
             {/*  Menu Items */}
             <nav>
-              {/* Statistics */}
-              <NavLink
-                to='/dashboard'
-                end
-                className={({ isActive }) =>
-                  `flex items-center px-4 py-2 my-5  transition-colors duration-300 transform  hover:bg-gray-300   hover:text-gray-700 ${
-                    isActive ? 'bg-gray-300  text-gray-700' : 'text-gray-600'
-                  }`
-                }
-              >
-                <BsGraphUp className='w-5 h-5' />
 
-                <span className='mx-4 font-medium'>Statistics</span>
-              </NavLink>
+              {/* Statistics */}
+              <MenuItem label={'Statistics'} address='/dashboard' icon={BsGraphUp}></MenuItem>
+
 
               {/* Add Room */}
               <NavLink
                 to='add-room'
                 className={({ isActive }) =>
-                  `flex items-center px-4 py-2 my-5  transition-colors duration-300 transform  hover:bg-gray-300   hover:text-gray-700 ${
-                    isActive ? 'bg-gray-300  text-gray-700' : 'text-gray-600'
+                  `flex items-center px-4 py-2 my-5  transition-colors duration-300 transform  hover:bg-gray-300   hover:text-gray-700 ${isActive ? 'bg-gray-300  text-gray-700' : 'text-gray-600'
                   }`
                 }
               >
@@ -102,8 +94,7 @@ const Sidebar = () => {
               <NavLink
                 to='my-listings'
                 className={({ isActive }) =>
-                  `flex items-center px-4 py-2 my-5  transition-colors duration-300 transform  hover:bg-gray-300   hover:text-gray-700 ${
-                    isActive ? 'bg-gray-300  text-gray-700' : 'text-gray-600'
+                  `flex items-center px-4 py-2 my-5  transition-colors duration-300 transform  hover:bg-gray-300   hover:text-gray-700 ${isActive ? 'bg-gray-300  text-gray-700' : 'text-gray-600'
                   }`
                 }
               >
@@ -122,8 +113,7 @@ const Sidebar = () => {
           <NavLink
             to='/dashboard/profile'
             className={({ isActive }) =>
-              `flex items-center px-4 py-2 my-5  transition-colors duration-300 transform  hover:bg-gray-300   hover:text-gray-700 ${
-                isActive ? 'bg-gray-300  text-gray-700' : 'text-gray-600'
+              `flex items-center px-4 py-2 my-5  transition-colors duration-300 transform  hover:bg-gray-300   hover:text-gray-700 ${isActive ? 'bg-gray-300  text-gray-700' : 'text-gray-600'
               }`
             }
           >
