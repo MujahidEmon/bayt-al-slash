@@ -97,7 +97,7 @@ async function run() {
           return res.send(isExist);
         }
       }
-      
+
       const options = { upsert: true };
       const updateDoc = {
         $set: {
@@ -109,18 +109,33 @@ async function run() {
       res.send(result);
     });
 
+    app.patch("/user/update/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const query = { email };
+      const updateDoc = {
+        $set: {
+          ...user,
+          timestamp: Date.now(),
+        },
+      };
+
+      const result = await usersCollection.updateOne(query, updateDoc);
+      res.send(result);
+    });
+
     app.get("/users", async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
     });
 
     // single user
-    app.get('/user/:email' , async (req, res) => {
+    app.get("/user/:email", async (req, res) => {
       const email = req.params.email;
-      const query = {email: email}
-      const result = await usersCollection.findOne(query)
+      const query = { email: email };
+      const result = await usersCollection.findOne(query);
       res.send(result);
-    })
+    });
 
     // rooms related Api
     app.get("/rooms", async (req, res) => {
