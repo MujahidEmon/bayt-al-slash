@@ -13,16 +13,25 @@ import MenuItem from './Sidebar/MenuItem'
 import HostMenu from './Sidebar/Menu/HostMenu'
 import AdminMenu from './Sidebar/Menu/AdminMenu'
 import GuestMenu from './Sidebar/Menu/GuestMenu'
+import ToggleBtn from '../Button/ToggleBtn'
 
 const Sidebar = () => {
   const { logOut } = useAuth()
   const [isActive, setActive] = useState(false)
+  const [toggleValue, setToggleValue] = useState(true)
   const [role] = useRole()
   console.log(role);
 
   // Sidebar Responsive Handler
   const handleToggle = () => {
     setActive(!isActive)
+    console.log(toggleValue);
+  }
+
+
+  // host-guest toggle btn handler
+  const toggleHandler = (e) => {
+    setToggleValue(e.target.checked)
   }
   return (
     <>
@@ -73,7 +82,7 @@ const Sidebar = () => {
           {/* Nav Items */}
           <div className='flex flex-col justify-between flex-1 mt-6'>
             {/* Conditional toggle button here.. */}
-
+            {role === 'host' && <ToggleBtn toggleHandler={toggleHandler} toggleValue={toggleValue}></ToggleBtn>}
             {/*  Menu Items */}
             <nav>
               {/* Statistics */}
@@ -84,7 +93,7 @@ const Sidebar = () => {
               {role === 'admin' && <AdminMenu></AdminMenu>}
 
               {/* Host Menu */}
-              {role === 'host' && <HostMenu></HostMenu>}
+              {role === 'host' && toggleValue ? <HostMenu></HostMenu> : <GuestMenu></GuestMenu>}
 
               {/* Guest Menu */}
               {role === 'guest' && <GuestMenu ></GuestMenu>}
