@@ -10,6 +10,9 @@ import { MdHomeWork } from 'react-icons/md'
 import useAuth from '../../hooks/useAuth'
 import useRole from '../../hooks/useRole'
 import MenuItem from './Sidebar/MenuItem'
+import HostMenu from './Sidebar/Menu/HostMenu'
+import GuestMenu from './Sidebar/Menu/GuestMenu'
+import AdminMenu from './Sidebar/Menu/AdminMenu'
 
 const Sidebar = () => {
   const { logOut } = useAuth()
@@ -74,14 +77,17 @@ const Sidebar = () => {
             {/*  Menu Items */}
             <nav>
 
-              {/* Statistics */}
-              <MenuItem label={'Statistics'} address='/dashboard' icon={BsGraphUp}></MenuItem>
+              {/* Admin Menu */}
 
-              {/* Add Room */}
-              <MenuItem label={'Add Room'} address='add-room' icon={BsFillHouseAddFill}></MenuItem>
+              {role === 'admin' && <AdminMenu></AdminMenu>}
 
-              {/* My Listing */}
-              <MenuItem label={'My Listings'} address='my-listings' icon={MdHomeWork}></MenuItem>
+              {/* Host Menu */}
+              {role === 'host' && <HostMenu></HostMenu>}
+
+              {/* Guest Menu */}
+              {role === 'guest' && <GuestMenu></GuestMenu>}
+
+
             </nav>
           </div>
         </div>
