@@ -11,6 +11,9 @@ import MyListings from '../pages/Dashboard/Admin/MyListings'
 import AddRoom from '../pages/Dashboard/Admin/AddRoom'
 import Profile from '../pages/Dashboard/Common/Profile'
 import ManageUsers from '../pages/Dashboard/Admin/ManageUsers'
+import PrivateRoute from './PrivateRoute'
+import HostRoutes from './HostRoutes'
+import AdminRoutes from './AdminRoutes'
 
 export const router = createBrowserRouter([
   {
@@ -32,27 +35,41 @@ export const router = createBrowserRouter([
   { path: '/signup', element: <SignUp /> },
   {
     path: 'dashboard',
-    element: <DashboardLayout></DashboardLayout>,
+    element: <PrivateRoute><DashboardLayout></DashboardLayout></PrivateRoute>,
     children: [
       {
-        index:true,
-        element: <Statistics></Statistics>
+        index: true,
+        element: <PrivateRoute><Statistics></Statistics></PrivateRoute>
       },
       {
         path: 'my-listings',
-        element: <MyListings></MyListings>
+        element:
+          <PrivateRoute>
+            <HostRoutes>
+              <MyListings></MyListings>
+            </HostRoutes>
+          </PrivateRoute>
       },
       {
         path: 'add-room',
-        element: <AddRoom></AddRoom>
+        element:
+          <PrivateRoute>
+            <HostRoutes><AddRoom></AddRoom></HostRoutes>
+          </PrivateRoute>
+
       },
       {
         path: 'manage-users',
-        element: <ManageUsers></ManageUsers>
+        element:
+          <PrivateRoute>
+            <AdminRoutes>
+              <ManageUsers></ManageUsers>
+            </AdminRoutes>
+          </PrivateRoute>
       },
       {
         path: 'profile',
-        element: <Profile></Profile>
+        element: <PrivateRoute><Profile></Profile></PrivateRoute>
       },
     ]
   }

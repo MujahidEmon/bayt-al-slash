@@ -93,7 +93,7 @@ const Sidebar = () => {
               {role === 'admin' && <AdminMenu></AdminMenu>}
 
               {/* Host Menu */}
-              {role === 'host' && toggleValue ? <HostMenu></HostMenu> : <GuestMenu></GuestMenu>}
+              {role === 'host' ? toggleValue ? <HostMenu></HostMenu> : <GuestMenu></GuestMenu> : undefined}
 
               {/* Guest Menu */}
               {role === 'guest' && <GuestMenu ></GuestMenu>}
