@@ -11,8 +11,8 @@ import useAuth from '../../hooks/useAuth'
 import useRole from '../../hooks/useRole'
 import MenuItem from './Sidebar/MenuItem'
 import HostMenu from './Sidebar/Menu/HostMenu'
-import GuestMenu from './Sidebar/Menu/GuestMenu'
 import AdminMenu from './Sidebar/Menu/AdminMenu'
+import GuestMenu from './Sidebar/Menu/GuestMenu'
 
 const Sidebar = () => {
   const { logOut } = useAuth()
@@ -76,6 +76,8 @@ const Sidebar = () => {
 
             {/*  Menu Items */}
             <nav>
+              {/* Statistics */}
+              <MenuItem label={'Statistics'} address='/dashboard' icon={BsGraphUp}></MenuItem>
 
               {/* Admin Menu */}
 
@@ -85,9 +87,7 @@ const Sidebar = () => {
               {role === 'host' && <HostMenu></HostMenu>}
 
               {/* Guest Menu */}
-              {role === 'guest' && <GuestMenu></GuestMenu>}
-
-
+              {role === 'guest' && <GuestMenu ></GuestMenu>}
             </nav>
           </div>
         </div>
