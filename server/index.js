@@ -169,7 +169,7 @@ async function run() {
       res.send(result);
     });
 
-    app.post("/rooms", async (req, res) => {
+    app.post("/rooms", verifyToken, verifyHost,  async (req, res) => {
       const room = req.body;
       console.log(room);
       const result = await roomsCollection.insertOne(room);
@@ -183,13 +183,18 @@ async function run() {
       const result = await roomsCollection.findOne(query);
       res.send(result);
     });
-    app.delete("/room/:id", async (req, res) => {
+
+
+    // delete single room as a host
+    app.delete("/room/:id",verifyToken, verifyHost, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await roomsCollection.deleteOne(query);
       res.send(result);
     });
-    app.get("/rooms/:email", async (req, res) => {
+
+    // my listing api
+    app.get("/rooms/:email", verifyToken, verifyHost, async (req, res) => {
       const email = req.params.email;
       const query = { "host.email": email };
       const result = await roomsCollection.find(query).toArray();
