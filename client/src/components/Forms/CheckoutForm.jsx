@@ -1,7 +1,9 @@
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import './CheckoutForm.css'
+import { useState } from 'react';
 
 const CheckoutForm = ({ closeModal, bookingInfo }) => {
+    const [clientSecret, setClientSecret] = useState("");
     const stripe = useStripe();
     const elements = useElements();
 
