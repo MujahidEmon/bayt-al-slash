@@ -5,7 +5,7 @@ import { DateRange } from 'react-date-range';
 import BookingModal from '../Modal/BookingModal';
 import useAuth from '../../hooks/useAuth';
 
-const RoomReservation = ({ room, totalPrice }) => {
+const RoomReservation = ({ room, totalPrice, refetch }) => {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const closeModal = () => {
@@ -45,8 +45,8 @@ const RoomReservation = ({ room, totalPrice }) => {
       </div>
       <hr />
       <div className='p-4'>
-        <Button onClick={() => setIsOpen(true)} label={'Reserve'} />
-        <BookingModal closeModal={closeModal} isOpen={isOpen} bookingInfo={{ ...room, price: totalPrice, guest: { name: user?.displayName } }}></BookingModal>
+        <Button disabled={room.booked === true} onClick={() => setIsOpen(true)} label={'Reserve'} />
+        <BookingModal refetch={refetch} closeModal={closeModal} isOpen={isOpen} bookingInfo={{ ...room, price: totalPrice, guest: { name: user?.displayName } }}></BookingModal>
       </div>
       <hr />
       <div className='p-4 flex items-center justify-between font-semibold text-lg'>

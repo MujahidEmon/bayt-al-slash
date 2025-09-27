@@ -3,17 +3,21 @@ import './CheckoutForm.css'
 import { useEffect, useState } from 'react';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import useAuth from '../../hooks/useAuth';
-import { set } from 'date-fns';
+import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { FaSpinner } from 'react-icons/fa';
 
-const CheckoutForm = ({ closeModal, bookingInfo }) => {
+const CheckoutForm = ({ closeModal, bookingInfo, refetch }) => {
     const [clientSecret, setClientSecret] = useState();
     const [error, setError] = useState("");
     const [processing, setProcessing] = useState(false);
-    const [transactionId, setTransactionId] = useState(""); 
+    const [transactionId, setTransactionId] = useState("");
     const axiosSecure = useAxiosSecure();
     const stripe = useStripe();
     const elements = useElements();
-    const {user} = useAuth();
+    const { user } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (bookingInfo?.price) {
@@ -24,7 +28,7 @@ const CheckoutForm = ({ closeModal, bookingInfo }) => {
     const getClientSecret = async (price) => {
         const { data } = await axiosSecure.post('/create-payment-intent', { price });
         console.log('client secret', data);
-        setClientSecret(data?.clientSecret);        
+        setClientSecret(data?.clientSecret);
     }
 
     const handleSubmit = async (event) => {
@@ -60,7 +64,7 @@ const CheckoutForm = ({ closeModal, bookingInfo }) => {
         }
 
         // confirm card payment
-        const {error: confirmError, paymentIntent} =await stripe.confirmCardPayment(clientSecret, {
+        const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
             payment_method: {
                 card: card,
                 billing_details: {
@@ -70,13 +74,13 @@ const CheckoutForm = ({ closeModal, bookingInfo }) => {
             }
         })
 
-        if(confirmError){
+        if (confirmError) {
             setError(confirmError.message);
             setProcessing(false);
             return;
         }
 
-        if(paymentIntent.status === 'succeeded'){
+        if (paymentIntent.status === 'succeeded') {
             setError("");
             setTransactionId(paymentIntent?.id);
             // save payment information to the server
@@ -90,12 +94,17 @@ const CheckoutForm = ({ closeModal, bookingInfo }) => {
 
             delete paymentData._id;
 
-            const {data} = await axiosSecure.post('/bookings', paymentData);
+            const { data } = await axiosSecure.post('/bookings', paymentData);
             console.log(data);
-            setProcessing(false)
+
+            await axiosSecure.patch(`/room/status/${bookingInfo._id}`, { status: true });
             closeModal();
-        }
-        console.log(transactionId); 
+            refetch();
+            toast.success('Payment successful and booking confirmed');
+            navigate('/dashboard/my-bookings');
+            setProcessing(false)
+        }  
+        console.log(transactionId);
 
     };
 
@@ -119,11 +128,11 @@ const CheckoutForm = ({ closeModal, bookingInfo }) => {
             />
             <div className='flex mt-2 justify-around'>
                 <button
-                    disabled={!stripe || !clientSecret || processing }
+                    disabled={!stripe || !clientSecret || processing}
                     type='submit'
                     className={'inline-flex justify-center rounded-md border border-transparent bg-green-100 px-4 py-2 text-sm font-medium text-green-900 hover:bg-green-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2'}
                 >
-                    Pay ${bookingInfo.price}
+                    {processing ? <FaSpinner className='animate-spin' size={20}></FaSpinner> :` Pay $${bookingInfo.price}`}
                 </button>
                 <button
                     type='button'
@@ -138,5 +147,10 @@ const CheckoutForm = ({ closeModal, bookingInfo }) => {
 
 };
 
+CheckoutForm.propTypes = {
+    bookingInfo: PropTypes.object,
+    closeModal: PropTypes.func,
+    refetch: PropTypes.func,
+};
 
 export default CheckoutForm

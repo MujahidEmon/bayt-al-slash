@@ -15,7 +15,7 @@ import { differenceInDays } from 'date-fns'
 const RoomDetails = () => {
   const axiosPublic = useAxiosPublic();
   const { id } = useParams();
-  const { data: room = {}, isLoading } = useQuery({
+  const { data: room = {}, isLoading, refetch } = useQuery({
     queryKey: ['room', id],
     queryFn: async () => {
       const res = await axiosPublic.get(`/room/${id}`)
@@ -107,7 +107,7 @@ const RoomDetails = () => {
 
             <div className='md:col-span-3 order-first md:order-last mb-10'>
               {/* RoomReservation */}
-              <RoomReservation totalPrice={totalPrice} room={room} />
+              <RoomReservation refetch={refetch} totalPrice={totalPrice} room={room} />
             </div>
           </div>
         </div>

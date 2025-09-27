@@ -211,19 +211,21 @@ async function run() {
     // booking related api
     app.post("/bookings", verifyToken, async (req, res) => {
       const booking = req.body;
-
-      const { roomId } = req.body;
-      const query = { _id: new ObjectId(roomId) };
-
       const result = await bookingsCollection.insertOne(booking);
+      res.send(result);
+    });
 
+    app.patch("/room/status/:id", verifyToken, async (req, res) => {
+      const id = req.params.id;
+      const status = req.body.status; 
+      const query = { _id: new ObjectId(id) };
       const updatedDoc = {
         $set: {
-          booked: true,
+          booked: status,
         },
       };
       const updateResult = await roomsCollection.updateOne(query, updatedDoc);
-      res.send({ result, updateResult });
+      res.send(updateResult);
     });
 
     // my listing api
