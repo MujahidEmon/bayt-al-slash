@@ -51,8 +51,10 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Collections
-    const roomsCollection = client.db("BaytSlashDb").collection("rooms");
-    const usersCollection = client.db("BaytSlashDb").collection("users");
+    const db = client.db("BaytSlashDb");
+    const roomsCollection = db.collection("rooms");
+    const usersCollection = db.collection("users");
+    const bookingsCollection = db.collection("bookings");
 
     const verifyAdmin = async (req, res, next) => {
       const user = req.user;
@@ -75,22 +77,19 @@ async function run() {
       next();
     };
 
-
-
     // payment related api
     app.post("/create-payment-intent", verifyToken, async (req, res) => {
       const { price } = req.body;
       const amount = price * 100;
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
-        currency: "usd"
+        currency: "usd",
       });
 
       res.send({
         clientSecret: paymentIntent.client_secret,
       });
     });
-
 
     // auth related api
     app.post("/jwt", async (req, res) => {
@@ -186,7 +185,7 @@ async function run() {
       res.send(result);
     });
 
-    app.post("/rooms", verifyToken, verifyHost,  async (req, res) => {
+    app.post("/rooms", verifyToken, verifyHost, async (req, res) => {
       const room = req.body;
       console.log(room);
       const result = await roomsCollection.insertOne(room);
@@ -201,13 +200,30 @@ async function run() {
       res.send(result);
     });
 
-
     // delete single room as a host
-    app.delete("/room/:id",verifyToken, verifyHost, async (req, res) => {
+    app.delete("/room/:id", verifyToken, verifyHost, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await roomsCollection.deleteOne(query);
       res.send(result);
+    });
+
+    // booking related api
+    app.post("/bookings", verifyToken, async (req, res) => {
+      const booking = req.body;
+
+      const { roomId } = req.body;
+      const query = { _id: new ObjectId(roomId) };
+
+      const result = await bookingsCollection.insertOne(booking);
+
+      const updatedDoc = {
+        $set: {
+          booked: true,
+        },
+      };
+      const updateResult = await roomsCollection.updateOne(query, updatedDoc);
+      res.send({ result, updateResult });
     });
 
     // my listing api

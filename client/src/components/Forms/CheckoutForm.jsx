@@ -1,13 +1,34 @@
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import './CheckoutForm.css'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import useAxiosSecure from '../../hooks/useAxiosSecure';
+import useAuth from '../../hooks/useAuth';
+import { set } from 'date-fns';
 
 const CheckoutForm = ({ closeModal, bookingInfo }) => {
-    const [clientSecret, setClientSecret] = useState("");
+    const [clientSecret, setClientSecret] = useState();
+    const [error, setError] = useState("");
+    const [processing, setProcessing] = useState(false);
+    const [transactionId, setTransactionId] = useState(""); 
+    const axiosSecure = useAxiosSecure();
     const stripe = useStripe();
     const elements = useElements();
+    const {user} = useAuth();
+
+    useEffect(() => {
+        if (bookingInfo?.price) {
+            getClientSecret(bookingInfo?.price);
+        }
+    }, [])
+
+    const getClientSecret = async (price) => {
+        const { data } = await axiosSecure.post('/create-payment-intent', { price });
+        console.log('client secret', data);
+        setClientSecret(data?.clientSecret);        
+    }
 
     const handleSubmit = async (event) => {
+        setProcessing(true);
         // Block native form submission.
         event.preventDefault();
 
@@ -37,6 +58,45 @@ const CheckoutForm = ({ closeModal, bookingInfo }) => {
         } else {
             console.log('[PaymentMethod]', paymentMethod);
         }
+
+        // confirm card payment
+        const {error: confirmError, paymentIntent} =await stripe.confirmCardPayment(clientSecret, {
+            payment_method: {
+                card: card,
+                billing_details: {
+                    name: user?.displayName || 'unknown',
+                    email: user?.email || 'anonymous',
+                }
+            }
+        })
+
+        if(confirmError){
+            setError(confirmError.message);
+            setProcessing(false);
+            return;
+        }
+
+        if(paymentIntent.status === 'succeeded'){
+            setError("");
+            setTransactionId(paymentIntent?.id);
+            // save payment information to the server
+            const paymentData = {
+                email: user?.email,
+                transactionId: paymentIntent.id,
+                price: bookingInfo.price,
+                roomId: bookingInfo._id,
+                date: new Date(),
+            }
+
+            delete paymentData._id;
+
+            const {data} = await axiosSecure.post('/bookings', paymentData);
+            console.log(data);
+            setProcessing(false)
+            closeModal();
+        }
+        console.log(transactionId); 
+
     };
 
     return (
@@ -59,9 +119,9 @@ const CheckoutForm = ({ closeModal, bookingInfo }) => {
             />
             <div className='flex mt-2 justify-around'>
                 <button
-                    disabled={!stripe}
+                    disabled={!stripe || !clientSecret || processing }
                     type='submit'
-                    className='inline-flex justify-center rounded-md border border-transparent bg-green-100 px-4 py-2 text-sm font-medium text-green-900 hover:bg-green-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2'
+                    className={'inline-flex justify-center rounded-md border border-transparent bg-green-100 px-4 py-2 text-sm font-medium text-green-900 hover:bg-green-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2'}
                 >
                     Pay ${bookingInfo.price}
                 </button>
@@ -77,5 +137,6 @@ const CheckoutForm = ({ closeModal, bookingInfo }) => {
     );
 
 };
+
 
 export default CheckoutForm
