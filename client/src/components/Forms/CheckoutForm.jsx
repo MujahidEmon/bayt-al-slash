@@ -85,6 +85,7 @@ const CheckoutForm = ({ closeModal, bookingInfo, refetch }) => {
             setTransactionId(paymentIntent?.id);
             // save payment information to the server
             const paymentData = {
+                ...bookingInfo,
                 guest: {
                     email: user?.email,
                     name: user?.displayName || 'unknown',

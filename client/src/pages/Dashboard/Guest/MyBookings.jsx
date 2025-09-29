@@ -20,26 +20,7 @@ const MyBookings = () => {
     console.log(bookings);
 
 
-    const { mutateAsync } = useMutation({
-        mutationFn: async (id) => {
-            const { data } = await axiosSecure.delete(`/bookings/${id}`)
-            console.log(data);
-            return data;
-        },
-        onSuccess: () => {
-            refetch();
-            toast.success('Deleted Successfully');
-        }
-    })
-
-    const handleDelete = (id) => {
-        console.log(id);
-        try {
-            mutateAsync(id);
-        } catch (error) {
-            console.log(error);
-        }
-    }
+    
 
     if (isLoading) return <LoadingSpinner></LoadingSpinner>
     return (
@@ -99,7 +80,6 @@ const MyBookings = () => {
                                             key={booking._id}
                                             booking={booking}
                                             refetch={refetch}
-                                            handleDelete={handleDelete}
                                         ></BookingDataRow>)
                                     }
                                 </tbody>
