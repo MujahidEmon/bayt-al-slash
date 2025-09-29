@@ -85,7 +85,11 @@ const CheckoutForm = ({ closeModal, bookingInfo, refetch }) => {
             setTransactionId(paymentIntent?.id);
             // save payment information to the server
             const paymentData = {
-                email: user?.email,
+                guest: {
+                    email: user?.email,
+                    name: user?.displayName || 'unknown',
+                    image: user?.photoURL || 'https://i.ibb.co/4pDNDk1/avatar.png'
+                },
                 transactionId: paymentIntent.id,
                 price: bookingInfo.price,
                 roomId: bookingInfo._id,
@@ -103,7 +107,7 @@ const CheckoutForm = ({ closeModal, bookingInfo, refetch }) => {
             toast.success('Payment successful and booking confirmed');
             navigate('/dashboard/my-bookings');
             setProcessing(false)
-        }  
+        }
         console.log(transactionId);
 
     };
@@ -132,7 +136,7 @@ const CheckoutForm = ({ closeModal, bookingInfo, refetch }) => {
                     type='submit'
                     className={'inline-flex justify-center rounded-md border border-transparent bg-green-100 px-4 py-2 text-sm font-medium text-green-900 hover:bg-green-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2'}
                 >
-                    {processing ? <FaSpinner className='animate-spin' size={20}></FaSpinner> :` Pay $${bookingInfo.price}`}
+                    {processing ? <FaSpinner className=' animate-spin' size={20}></FaSpinner> : ` Pay $${bookingInfo.price}`}
                 </button>
                 <button
                     type='button'

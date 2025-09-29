@@ -1,6 +1,47 @@
 import { Helmet } from 'react-helmet-async'
+import useAxiosSecure from '../../../hooks/useAxiosSecure';
+import useAuth from '../../../hooks/useAuth';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import LoadingSpinner from '../../../components/Shared/LoadingSpinner';
+import BookingDataRow from '../../../components/TableRows/BookingDataRow';
 
 const MyBookings = () => {
+    const axiosSecure = useAxiosSecure();
+    const { user } = useAuth();
+
+    const { data: bookings = [], isLoading, refetch } = useQuery({
+        queryKey: ['bookings'],
+        queryFn: async () => {
+            const res = await axiosSecure.get(`/bookings/${user.email}`)
+            return res.data
+        }
+    })
+    console.log(bookings);
+
+
+    const { mutateAsync } = useMutation({
+        mutationFn: async (id) => {
+            const { data } = await axiosSecure.delete(`/bookings/${id}`)
+            console.log(data);
+            return data;
+        },
+        onSuccess: () => {
+            refetch();
+            toast.success('Deleted Successfully');
+        }
+    })
+
+    const handleDelete = (id) => {
+        console.log(id);
+        try {
+            mutateAsync(id);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    if (isLoading) return <LoadingSpinner></LoadingSpinner>
     return (
         <>
             <Helmet>
@@ -52,9 +93,18 @@ const MyBookings = () => {
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody>{/* Table Row Data */}</tbody>
+                                <tbody>
+                                    {
+                                        bookings.map(booking => <BookingDataRow
+                                            key={booking._id}
+                                            booking={booking}
+                                            refetch={refetch}
+                                            handleDelete={handleDelete}
+                                        ></BookingDataRow>)
+                                    }
+                                </tbody>
                             </table>
-                        </div>
+                        </div> 
                     </div>
                 </div>
             </div>
