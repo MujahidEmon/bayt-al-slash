@@ -15,7 +15,7 @@ import PropTypes from 'prop-types'
 }
 const SalesLineChart = ({data}) => {
   return (
-    data.length <=1 ? <p className='text-center my-4'>No sales data found</p> :
+    data.length < 2 ? <p className='text-center my-4'>No sales data found</p> :
     <Chart chartType='LineChart' width='100%' data={data} options={options} />
   )
 }

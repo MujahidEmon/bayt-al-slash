@@ -215,20 +215,25 @@ async function run() {
       res.send(result);
     });
 
-    app.get('/bookings/:email', verifyToken, async (req, res) => {
+    app.get("/bookings/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
       const query = { "guest.email": email };
       const result = await bookingsCollection.find(query).toArray();
       res.send(result);
-    })
+    });
 
     // manage bookings api for host
-    app.get("/manage-bookings/:email", verifyToken, verifyHost, async (req, res) => {
-      const email = req.params.email;
-      const query = { "host.email": email };
-      const result = await bookingsCollection.find(query).toArray();
-      res.send(result);
-    });
+    app.get(
+      "/manage-bookings/:email",
+      verifyToken,
+      verifyHost,
+      async (req, res) => {
+        const email = req.params.email;
+        const query = { "host.email": email };
+        const result = await bookingsCollection.find(query).toArray();
+        res.send(result);
+      }
+    );
 
     app.delete("/bookings/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
@@ -239,7 +244,7 @@ async function run() {
 
     app.patch("/room/status/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
-      const status = req.body.status; 
+      const status = req.body.status;
       const query = { _id: new ObjectId(id) };
       const updatedDoc = {
         $set: {
@@ -258,30 +263,99 @@ async function run() {
       res.send(result);
     });
 
-
     // admin-statistics
-    app.get("/admin-stats",  async (req, res) => {
-      const bookingDetails = await bookingsCollection.find({}, {
-        projection: { 
-          price: 1,
-          date:1
-         }
-      }).toArray();
+    app.get("/admin-stats", async (req, res) => {
+      const bookingDetails = await bookingsCollection
+        .find(
+          {},
+          {
+            projection: {
+              price: 1,
+              date: 1,
+            },
+          }
+        )
+        .toArray();
       const users = await usersCollection.estimatedDocumentCount();
       const rooms = await roomsCollection.estimatedDocumentCount();
       const bookings = await bookingsCollection.estimatedDocumentCount();
-      totalSales =  bookingDetails.reduce((sum, booking) => sum + booking.price, 0);
+      totalSales = bookingDetails.reduce(
+        (sum, booking) => sum + booking.price,
+        0
+      );
 
-      const chartData = bookingDetails.map(booking => {
+      const chartData = bookingDetails.map((booking) => {
         const day = new Date(booking.date).getDate();
         const month = new Date(booking.date).getMonth() + 1;
         const data = [`${day}/${month}`, booking.price];
         return data;
-      })
+      });
 
-      chartData.unshift(['Day', 'Sales']);
-      res.send({ users, rooms, bookings, bookingDetails , totalSales, chartData});
+      chartData.unshift(["Day", "Sales"]);
+      res.send({
+        users,
+        rooms,
+        bookings,
+        bookingDetails,
+        totalSales,
+        chartData,
+      });
     });
+
+
+
+
+    // host-statistics
+    app.get("/host-stats", verifyToken, verifyHost, async (req, res) => {
+      const { email } = req.user;
+      const query = { "host.email": email };
+      const bookingDetails = await bookingsCollection.find(
+           query ,
+          {
+            projection: {
+              price: 1,
+              date: 1,
+            },
+          }
+        )
+        .toArray();
+      const {timestamp} = await usersCollection.findOne(
+        { email },
+        {
+          projection: {
+            timestamp: 1,
+          },
+        }
+      )
+      const rooms = (await roomsCollection.find(query).toArray()).length;
+      const bookings = bookingDetails.length;
+      totalSales = bookingDetails.reduce(
+        (sum, booking) => sum + booking.price,
+        0
+      );
+
+      const chartData = bookingDetails.map((booking) => {
+        const day = new Date(booking.date).getDate();
+        const month = new Date(booking.date).getMonth() + 1;
+        const data = [`${day}/${month}`, booking.price];
+        return data;
+      });
+
+      chartData.unshift(["Day", "Sales"]);
+      res.send({
+        rooms,
+        bookings,
+        bookingDetails,
+        totalSales,
+        chartData,
+        hostSince: timestamp,
+        email,
+      });
+    });
+
+
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
