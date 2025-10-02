@@ -2,10 +2,13 @@ import PropTypes from 'prop-types'
 import { format } from 'date-fns'
 import { Description, Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
 import { useState } from 'react'
+import UpdateRoomModal from '../Modal/UpdateRoomModal'
 
-const RoomDataRow = ({ room, handleDelete }) => {
+const RoomDataRow = ({ room, handleDelete, refetch }) => {
 
-    let [isOpen, setIsOpen] = useState(false)
+    const [isOpen, setIsOpen] = useState(false);
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+
 
 
     return (
@@ -75,9 +78,12 @@ const RoomDataRow = ({ room, handleDelete }) => {
                         aria-hidden='true'
                         className='absolute inset-0 bg-green-200 opacity-50 rounded-full'
                     ></span>
-                    <span className='relative'>Update</span>
+                    <button onClick={() => {
+                        setIsUpdateModalOpen(true)
+                    }} className='relative'>Update</button>
                 </span>
                 {/* Update Modal */}
+                <UpdateRoomModal isOpen={isUpdateModalOpen} setIsEditModalOpen={setIsUpdateModalOpen} refetch={refetch} room={room}></UpdateRoomModal>
             </td>
         </tr>
     )
@@ -86,6 +92,7 @@ const RoomDataRow = ({ room, handleDelete }) => {
 RoomDataRow.propTypes = {
     room: PropTypes.object,
     refetch: PropTypes.func,
+    handleDelete: PropTypes.func
 }
 
 export default RoomDataRow
