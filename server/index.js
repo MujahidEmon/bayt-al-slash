@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const jwt = require("jsonwebtoken");
 const e = require("express");
+const nodemailer = require("nodemailer");
 
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
@@ -76,6 +77,47 @@ async function run() {
 
       next();
     };
+
+
+
+    // Email function
+    const sendEmail =  (emailAddress, emailContent) => {
+
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        port: 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+          user: process.env.TRANSPORTER_USER,
+          pass: process.env.TRANSPORTER_PASS,
+        },
+      });
+
+      transporter.verify( (error, success) => {
+          if (error) {
+            console.log(error); 
+          } else {
+            console.log("Server is ready to take our messages");
+          }
+        });
+
+      
+        const info = {
+          from: `"Bayt-al-Slash" <${process.env.TRANSPORTER_USER}>`, // sender address
+          to: emailAddress, // list of receivers
+          subject: emailContent.subject, // Subject line
+          html: emailContent.message, // HTML body
+        }
+
+        transporter.sendMail(info, (err) => {
+          if (err) {
+            console.log(err);
+            return;
+          }
+        });
+        console.log("Message sent:", info.messageId);
+      };
+    
 
     // payment related api
     app.post("/create-payment-intent", verifyToken, async (req, res) => {
@@ -212,6 +254,22 @@ async function run() {
     app.post("/bookings", verifyToken, async (req, res) => {
       const booking = req.body;
       const result = await bookingsCollection.insertOne(booking);
+      sendEmail(booking?.guest?.email, {
+        subject: "Booking confirmed",
+        message: `<h2>Congratulations! Your booking is confirmed.</h2>) <br/>
+        <p>We are excited to inform you that your booking for ${booking?.room?.title} is confirmed. We look forward to hosting you!</p>
+        <h3>Booking Details:</h3>
+        <ul>
+          <li><strong>Room:</strong> ${booking?.room?.title}</li>
+          <li><strong>Location:</strong> ${booking?.room?.location}</li>
+          <li><strong>Check-in Date:</strong> ${new Date(booking?.from).toLocaleDateString()}</li>
+          <li><strong>Check-out Date:</strong> ${new Date(booking?.to).toLocaleDateString()}</li>
+          <li><strong>Total Price:</strong> $${booking?.price}</li>
+        </ul>
+        <p>If you have any questions or need further assistance, feel free to contact us.</p>
+        <p>Thank you for choosing our service. We wish you a pleasant stay!</p>
+        <p>Best regards,<br/>Bayt-al-Slash Team</p>`,
+      });
       res.send(result);
     });
 
@@ -235,7 +293,7 @@ async function run() {
       }
     );
 
-    app.delete("/bookings/:id", verifyToken, async (req, res) => {
+    app.delete("/booking/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await bookingsCollection.deleteOne(query);
@@ -302,31 +360,26 @@ async function run() {
       });
     });
 
-
-
-
     // host-statistics
     app.get("/host-stats", verifyToken, verifyHost, async (req, res) => {
       const { email } = req.user;
       const query = { "host.email": email };
-      const bookingDetails = await bookingsCollection.find(
-           query ,
-          {
-            projection: {
-              price: 1,
-              date: 1,
-            },
-          }
-        )
+      const bookingDetails = await bookingsCollection
+        .find(query, {
+          projection: {
+            price: 1,
+            date: 1,
+          },
+        })
         .toArray();
-      const {timestamp} = await usersCollection.findOne(
+      const { timestamp } = await usersCollection.findOne(
         { email },
         {
           projection: {
             timestamp: 1,
           },
         }
-      )
+      );
       const rooms = (await roomsCollection.find(query).toArray()).length;
       const bookings = bookingDetails.length;
       totalSales = bookingDetails.reduce(
@@ -353,31 +406,26 @@ async function run() {
       });
     });
 
-
-
-
     // guest-statistics
     app.get("/guest-stats", verifyToken, async (req, res) => {
       const { email } = req.user;
       const query = { "guest.email": email };
-      const bookingDetails = await bookingsCollection.find(
-           query ,
-          {
-            projection: {
-              price: 1,
-              date: 1,
-            },
-          }
-        )
+      const bookingDetails = await bookingsCollection
+        .find(query, {
+          projection: {
+            price: 1,
+            date: 1,
+          },
+        })
         .toArray();
-      const {timestamp} = await usersCollection.findOne(
+      const { timestamp } = await usersCollection.findOne(
         { email },
         {
           projection: {
             timestamp: 1,
           },
         }
-      )
+      );
       const rooms = (await roomsCollection.find(query).toArray()).length;
       const bookings = bookingDetails.length;
       totalSpent = bookingDetails.reduce(
@@ -403,9 +451,6 @@ async function run() {
         email,
       });
     });
-
-
-
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });

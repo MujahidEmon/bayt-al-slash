@@ -8,9 +8,11 @@ import {
 } from '@headlessui/react'
 import { Fragment, useState } from 'react'
 import UpdateRoomForm from '../Forms/UpdateRoomForm'
+import { imageUpload } from '../../api/utils/image_upload'
 
 const UpdateRoomModal = ({ setIsEditModalOpen, isOpen, room, refetch }) => {
     const [roomData, setRoomData] = useState(room);
+    const [loading, setLoading] = useState(false);
     const [dates, setDates] = useState([
         {
             startDate: new Date(room?.from),
@@ -21,6 +23,18 @@ const UpdateRoomModal = ({ setIsEditModalOpen, isOpen, room, refetch }) => {
 
     const handleDateChange = (item) => {
         setDates([item.selection]);
+    }
+
+    
+    const handleImage = async image => {
+        setLoading(true);
+        try {
+            const image_url = await imageUpload(image);
+            setRoomData({...roomData, image: image_url});
+            setLoading(false);
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     return (
@@ -62,7 +76,7 @@ const UpdateRoomModal = ({ setIsEditModalOpen, isOpen, room, refetch }) => {
                                 </DialogTitle>
                                 <div className='mt-2 w-full'>
                                     {/* Update room form */}
-                                    <UpdateRoomForm roomData={roomData} setRoomData={setRoomData} dates={dates} handleDateChange={handleDateChange}></UpdateRoomForm>
+                                    <UpdateRoomForm handleImage={handleImage} roomData={roomData} setRoomData={setRoomData} dates={dates} handleDateChange={handleDateChange}></UpdateRoomForm>
                                 </div>
                                 <hr className='mt-8 ' />
                                 <div className='mt-2 '>

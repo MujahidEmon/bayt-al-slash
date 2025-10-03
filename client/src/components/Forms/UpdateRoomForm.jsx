@@ -1,7 +1,7 @@
 import { categories } from "../Categories/CategoriesData"
 import PropTypes from "prop-types"
 
-const UpdateRoomForm = ({dates, handleDateChange, roomData, setRoomData}) => {
+const UpdateRoomForm = ({dates, handleDateChange, roomData, setRoomData, handleImage}) => {
   return (
     <div className='w-full min-h-[calc(100vh-40px)] flex flex-col justify-center items-center text-gray-800 rounded-xl bg-gray-50'>
       <form>
@@ -67,6 +67,7 @@ const UpdateRoomForm = ({dates, handleDateChange, roomData, setRoomData}) => {
                     name='image'
                     id='image'
                     accept='image/*'
+                    onChange={e => handleImage(e.target.files[0])}
                     hidden
                   />
                   <div className='bg-rose-500 text-white border border-gray-300 rounded font-semibold cursor-pointer p-1 px-3 hover:bg-rose-500'>

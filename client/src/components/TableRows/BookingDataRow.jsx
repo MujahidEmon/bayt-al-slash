@@ -13,7 +13,7 @@ const BookingDataRow = ({ booking, refetch, }) => {
 
     const { mutateAsync } = useMutation({
         mutationFn: async (id) => {
-            const { data } = await axiosSecure.delete(`/ /${id}`)
+            const { data } = await axiosSecure.delete(`/booking/${id}`)
             console.log(data);
             return data;
         },
